@@ -1,12 +1,14 @@
 package com.app.myapplication;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -22,6 +24,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +33,8 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 import pl.aprilapps.easyphotopicker.ChooserType;
 import pl.aprilapps.easyphotopicker.EasyImage;
+import pl.aprilapps.easyphotopicker.MediaFile;
+import pl.aprilapps.easyphotopicker.MediaSource;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -36,10 +42,14 @@ public class SignupActivity extends AppCompatActivity {
     TextInputEditText signupemail, signuppass, name, phone;
     FirebaseAuth auth;
     FirebaseFirestore firestore;
+    FirebaseStorage storage;
+    StorageReference storageReference;
     CircleImageView profilePic;
     ImageView cameraBtn;
 
     EasyImage easyImage;
+
+    Uri profileImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +66,8 @@ public class SignupActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
 
         easyImage = new EasyImage.Builder(this)
                 .setChooserTitle("Pick Profile Image")
@@ -63,7 +75,7 @@ public class SignupActivity extends AppCompatActivity {
                 .allowMultiple(false)
                 .build();
 
-        Glide.with(SignupActivity.this).load("https://img.freepik.com/free-photo/portrait-young-teen-tourist-visiting-great-wall-china_23-2151261879.jpg").into(profilePic);
+//        Glide.with(SignupActivity.this).load("https://img.freepik.com/free-photo/portrait-young-teen-tourist-visiting-great-wall-china_23-2151261879.jpg").into(profilePic);
 
         cameraBtn.setOnClickListener(v -> {
 
@@ -76,6 +88,7 @@ public class SignupActivity extends AppCompatActivity {
         signUpUser();
     });
     }
+
     private void signUpUser(){
         String email = signupemail.getText().toString();
         String password = signuppass.getText().toString();
@@ -97,37 +110,99 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void onSuccess(AuthResult authResult) {
 
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", authResult.getUser().getUid());
-                map.put("name", name);
-                map.put("phone", phone);
-                map.put("email", email);
-                firestore.collection(Constants.usersCollection).document(authResult.getUser().getUid()).set(map).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
+                if(profileImage == null){
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", authResult.getUser().getUid());
+                    map.put("name", name);
+                    map.put("phone", phone);
+                    map.put("email", email);
 
-                                Toast.makeText(SignupActivity.this, "Login Successfully", Toast.LENGTH_SHORT).show();
-                                Intent in = new Intent(SignupActivity.this, HomeActivity.class);
-                                startActivity(in);
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
+                    firestore.collection(Constants.usersCollection).document(authResult.getUser().getUid()).set(map).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+
+                                    Toast.makeText(SignupActivity.this, "Login Successfully", Toast.LENGTH_SHORT).show();
+                                    Intent in = new Intent(SignupActivity.this, HomeActivity.class);
+                                    startActivity(in);
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(SignupActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
+                else{
+                    String fileName = "Images/" + authResult.getUser().getUid() + ".png";
+                    StorageReference imageRef = storageReference.child(fileName);
+
+                    imageRef.putFile(profileImage).addOnSuccessListener(taskSnapshot -> {
+
+                        imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("id", authResult.getUser().getUid());
+                            map.put("name", name);
+                            map.put("phone", phone);
+                            map.put("email", email);
+                            map.put("image", uri.toString());
+
+                            firestore.collection(Constants.usersCollection).document(authResult.getUser().getUid()).set(map).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+
+                                            Toast.makeText(SignupActivity.this, "Login Successfully", Toast.LENGTH_SHORT).show();
+                                            Intent in = new Intent(SignupActivity.this, HomeActivity.class);
+                                            startActivity(in);
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(SignupActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+
+                        }).addOnFailureListener(e -> {
+                            Toast.makeText(SignupActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        });
+
+                    }).addOnFailureListener(e -> {
                         Toast.makeText(SignupActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                    });
+                }
 
             }
-        }).addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(SignupActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
-
-            }
+        }).addOnFailureListener(this, e -> {
+            Toast.makeText(SignupActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
         });
 
 
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        easyImage.handleActivityResult(requestCode, resultCode, data, this, new EasyImage.Callbacks() {
+            @Override
+            public void onImagePickerError(@NonNull Throwable throwable, @NonNull MediaSource mediaSource) {
+
+            }
+
+            @Override
+            public void onMediaFilesPicked(@NonNull MediaFile[] mediaFiles, @NonNull MediaSource mediaSource) {
+                profileImage = Uri.fromFile(mediaFiles[0].getFile());
+                Glide.with(SignupActivity.this).load(profileImage).into(profilePic);
+            }
+
+            @Override
+            public void onCanceled(@NonNull MediaSource mediaSource) {
+
+            }
+        });
 
     }
 }
