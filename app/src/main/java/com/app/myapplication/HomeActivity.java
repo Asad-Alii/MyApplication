@@ -10,10 +10,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.app.myapplication.adapters.UserListAdapter;
 import com.app.myapplication.models.User;
 import com.app.myapplication.utils.PrefUtils;
 import com.google.android.material.button.MaterialButton;
+
+import java.util.ArrayList;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -23,6 +28,10 @@ public class HomeActivity extends AppCompatActivity {
     MaterialButton logoutBtn;
 
     PrefUtils pref;
+
+    RecyclerView userListView;
+    private UserListAdapter adapter;
+    ArrayList<User> users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +43,12 @@ public class HomeActivity extends AppCompatActivity {
         pref = PrefUtils.getInstance(this);
 
         logoutBtn = this.findViewById(R.id.logout_btn);
+        userListView = this.findViewById(R.id.user_list);
+
+        userListView.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter = new UserListAdapter(this, users);
+        userListView.setAdapter(adapter);
 
 //        Toast.makeText(this, user.getName(), Toast.LENGTH_SHORT).show();
 
