@@ -23,7 +23,7 @@ public class LoginActivity extends AppCompatActivity {
 
     TextInputEditText email;
     TextInputEditText password;
-    MaterialButton button;
+    MaterialButton button, registerBtn;
 
     FirebaseAuth auth;
     FirebaseFirestore firestore;
@@ -38,10 +38,19 @@ public class LoginActivity extends AppCompatActivity {
         email = this.findViewById(R.id.email);
         password = this.findViewById(R.id.password);
         button = this.findViewById(R.id.button);
+        registerBtn = this.findViewById(R.id.regbtn_id);
+
 
         pref = PrefUtils.getInstance(LoginActivity.this);
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
+
+
+        registerBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+            startActivity(intent);
+        });
+
 
         button.setOnClickListener(view -> {
 

@@ -58,5 +58,20 @@
         android:text="Login"
         app:cornerRadius="10dp"
         android:paddingVertical="15dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="OR"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:paddingVertical="5dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/regbtn_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        app:cornerRadius="10dp"
+        android:paddingVertical="16dp"/>
 
 </LinearLayout>
