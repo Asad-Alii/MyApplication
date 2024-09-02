@@ -15,6 +15,7 @@ import com.app.myapplication.models.User;
 import com.app.myapplication.utils.CommonFunctions;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
@@ -24,6 +25,15 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
 
     private Context context;
     private ArrayList<User> users;
+    OnChatClickListener onChatClickListener;
+
+    public interface OnChatClickListener{
+        void onChatClick(int position);
+    }
+
+    public void setOnChatClickListener(OnChatClickListener onChatClickListener){
+        this.onChatClickListener = onChatClickListener;
+    }
 
     public UserListAdapter(Context context, ArrayList<User> users) {
         this.context = context;
@@ -66,12 +76,16 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
 
         CircleImageView profilePic;
         TextView name;
+        MaterialButton chatBtn;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             profilePic = itemView.findViewById(R.id.profile_pic);
             name = itemView.findViewById(R.id.name);
+            chatBtn = itemView.findViewById(R.id.chat_btn);
+
+            chatBtn.setOnClickListener(view -> onChatClickListener.onChatClick(getAdapterPosition()));
         }
     }
 }

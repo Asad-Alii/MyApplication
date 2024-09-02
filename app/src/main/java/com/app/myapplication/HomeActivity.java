@@ -2,6 +2,7 @@ package com.app.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageButton;
 import android.widget.QuickContactBadge;
 import android.widget.Toast;
 
@@ -19,6 +20,7 @@ import com.app.myapplication.utils.Constants;
 import com.app.myapplication.utils.PrefUtils;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -29,15 +31,11 @@ public class HomeActivity extends AppCompatActivity {
     User user;
     String activityName;
 
-    MaterialButton logoutBtn;
+    ImageButton logoutBtn;
 
     PrefUtils pref;
 
-    RecyclerView userListView;
-    private UserListAdapter adapter;
-    ArrayList<User> users;
-
-    FirebaseFirestore firestore;
+    FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +47,14 @@ public class HomeActivity extends AppCompatActivity {
         pref = PrefUtils.getInstance(this);
 
         logoutBtn = this.findViewById(R.id.logout_btn);
-        userListView = this.findViewById(R.id.user_list);
-
-        firestore = FirebaseFirestore.getInstance();
-
-        users = new ArrayList<>();
-
-        userListView.setLayoutManager(new LinearLayoutManager(this));
+        fab = this.findViewById(R.id.fab);
 
 //        Toast.makeText(this, user.getName(), Toast.LENGTH_SHORT).show();
+
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(this, UsersActivity.class);
+            startActivity(intent);
+        });
 
         logoutBtn.setOnClickListener(view -> {
             if(pref.clearPrefs()){
@@ -69,25 +66,5 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(this, "Unable to logout. Please try again!", Toast.LENGTH_SHORT).show();
             }
         });
-
-        firestore.collection(Constants.usersCollection).get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-
-//                    int count = queryDocumentSnapshots.getDocuments().size();
-//                    Toast.makeText(this, "Count: " + count, Toast.LENGTH_SHORT).show();
-
-                    //for(int i = 0; i < 10; i++){}
-
-                    for(DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()){
-                        users.add(snapshot.toObject(User.class));
-                    }
-
-                    adapter = new UserListAdapter(this, users);
-                    userListView.setAdapter(adapter);
-
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, e.getMessage().toString(), Toast.LENGTH_SHORT).show();
-                });
     }
 }
