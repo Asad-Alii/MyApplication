@@ -21,9 +21,13 @@ import com.app.myapplication.models.User;
 import com.app.myapplication.utils.Constants;
 import com.app.myapplication.utils.PrefUtils;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UsersActivity extends AppCompatActivity {
 
@@ -65,11 +69,6 @@ public class UsersActivity extends AppCompatActivity {
         firestore.collection(Constants.usersCollection).whereNotEqualTo("id", pref.getUser().getId()).get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
 
-//                    int count = queryDocumentSnapshots.getDocuments().size();
-//                    Toast.makeText(this, "Count: " + count, Toast.LENGTH_SHORT).show();
-
-                    //for(int i = 0; i < 10; i++){}
-
                     for(DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()){
                         users.add(snapshot.toObject(User.class));
                     }
@@ -79,14 +78,58 @@ public class UsersActivity extends AppCompatActivity {
                     userListView.setAdapter(adapter);
 
                     adapter.setOnChatClickListener(position -> {
-                        Toast.makeText(this, users.get(position).getName(), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, users.get(position).getName(), Toast.LENGTH_SHORT).show();
+
+                        String channelId = firestore.collection(Constants.channelsCollection).document().getId();
+
+                        Map<String, Object> channelMap = new HashMap<>();
+                        channelMap.put("channelId", channelId);
+                        channelMap.put("createdAt", FieldValue.serverTimestamp());
+                        channelMap.put("updatedAt", FieldValue.serverTimestamp());
+                        channelMap.put("createdBy", pref.getUser().getId());
+
+                        ArrayList<String> userIds = new ArrayList<>();
+                        userIds.add(pref.getUser().getId());
+                        userIds.add(users.get(position).getId());
+
+                        channelMap.put("userIds", userIds);
+
+                        firestore.collection(Constants.channelsCollection).document(channelId).set(channelMap)
+                                .addOnSuccessListener(unused -> {
+
+//                                    Toast.makeText(this, "Channel created Successfully!", Toast.LENGTH_SHORT).show();
+
+                                    String chatId = firestore.collection(Constants.chatsCollection).document().getId();
+
+                                    Map<String, Object> chatMap = new HashMap<>();
+                                    chatMap.put("chatId", chatId);
+                                    chatMap.put("message", "Hello");
+                                    chatMap.put("createdAt", FieldValue.serverTimestamp());
+                                    chatMap.put("updatedAt", FieldValue.serverTimestamp());
+                                    chatMap.put("isRead", false);
+                                    chatMap.put("type", "text");
+                                    chatMap.put("authorId", pref.getUser().getId());
+
+                                    firestore.collection(Constants.channelsCollection).document(channelId)
+                                            .collection(Constants.chatsCollection).document(chatId).set(chatMap)
+                                            .addOnSuccessListener(unused1 -> {
+
+                                                Toast.makeText(this, "Message Sent Successfully!", Toast.LENGTH_SHORT).show();
+
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                loader.setVisibility(View.GONE);
+                                                Toast.makeText(this, e.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                                            });
+
+                                })
+                                .addOnFailureListener(e -> {
+                                    loader.setVisibility(View.GONE);
+                                    Toast.makeText(this, e.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                                });
+
                     });
 
-//                    new Handler().postDelayed(() -> {
-//                        loader.setVisibility(View.GONE);
-//                        adapter = new UserListAdapter(this, users);
-//                        userListView.setAdapter(adapter);
-//                    }, 2000);
 
                 })
                 .addOnFailureListener(e -> {
