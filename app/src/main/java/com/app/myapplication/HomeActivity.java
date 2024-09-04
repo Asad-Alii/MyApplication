@@ -14,7 +14,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.app.myapplication.adapters.ChannelListAdapter;
 import com.app.myapplication.adapters.UserListAdapter;
+import com.app.myapplication.models.Channel;
 import com.app.myapplication.models.User;
 import com.app.myapplication.utils.Constants;
 import com.app.myapplication.utils.PrefUtils;
@@ -37,6 +39,12 @@ public class HomeActivity extends AppCompatActivity {
 
     FloatingActionButton fab;
 
+    RecyclerView channelListView;
+
+    ChannelListAdapter adapter;
+
+    ArrayList<Channel> channels;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +56,12 @@ public class HomeActivity extends AppCompatActivity {
 
         logoutBtn = this.findViewById(R.id.logout_btn);
         fab = this.findViewById(R.id.fab);
+        channelListView = this.findViewById(R.id.channel_list_view);
+
+        channelListView.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter = new ChannelListAdapter(this, channels);
+        channelListView.setAdapter(adapter);
 
 //        Toast.makeText(this, user.getName(), Toast.LENGTH_SHORT).show();
 
