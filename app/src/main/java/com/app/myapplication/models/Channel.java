@@ -1,15 +1,23 @@
 package com.app.myapplication.models;
 
+import com.google.firebase.firestore.ServerTimestamp;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Channel implements Serializable {
 
     String channelId;
-    long createdAt;
-    long updatedAt;
+
+    @ServerTimestamp
+    Date createdAt;
+    @ServerTimestamp
+    Date updatedAt;
+
     String createdBy;
     ArrayList<String> userIds = new ArrayList<>();
+    User user;
 
     public String getChannelId() {
         return channelId;
@@ -19,19 +27,19 @@ public class Channel implements Serializable {
         this.channelId = channelId;
     }
 
-    public long getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(long createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    public long getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(long updatedAt) {
+    public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
 
@@ -49,5 +57,13 @@ public class Channel implements Serializable {
 
     public void setUserIds(ArrayList<String> userIds) {
         this.userIds = userIds;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

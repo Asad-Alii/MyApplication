@@ -45,6 +45,8 @@ public class HomeActivity extends AppCompatActivity {
 
     ArrayList<Channel> channels;
 
+    FirebaseFirestore firestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +54,11 @@ public class HomeActivity extends AppCompatActivity {
         activityName = getIntent().getStringExtra("activity");
         setContentView(R.layout.activity_home);
 
+        firestore = FirebaseFirestore.getInstance();
+
         pref = PrefUtils.getInstance(this);
+
+        channels = new ArrayList<>();
 
         logoutBtn = this.findViewById(R.id.logout_btn);
         fab = this.findViewById(R.id.fab);
@@ -60,10 +66,7 @@ public class HomeActivity extends AppCompatActivity {
 
         channelListView.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new ChannelListAdapter(this, channels);
-        channelListView.setAdapter(adapter);
-
-//        Toast.makeText(this, user.getName(), Toast.LENGTH_SHORT).show();
+        getChannels();
 
         fab.setOnClickListener(view -> {
             Intent intent = new Intent(this, UsersActivity.class);
@@ -80,5 +83,49 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(this, "Unable to logout. Please try again!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void getChannels(){
+
+        firestore.collection(Constants.channelsCollection).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+
+                    for(DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()){
+
+                        ArrayList<String> userIds = (ArrayList<String>) snapshot.get("userIds");
+
+                        String otherId = userIds.stream().filter(id -> !id.equals(pref.getUser().getId())).findFirst().get();
+
+//                        for(String id : userIds){
+//                            if(!id.equals(pref.getUser().getId())){
+//                                otherId = id;
+//                            }
+//                        }
+
+                        firestore.collection(Constants.usersCollection).document(otherId).get()
+                                .addOnSuccessListener(documentSnapshot -> {
+
+                                    User user = documentSnapshot.toObject(User.class);
+                                    Channel channel = snapshot.toObject(Channel.class);
+                                    channel.setUser(user);
+
+                                    channels.add(channel);
+                                    adapter.notifyItemChanged(channels.size() - 1);
+
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, e.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                                });
+
+                    }
+
+                    adapter = new ChannelListAdapter(this, channels);
+                    channelListView.setAdapter(adapter);
+
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, e.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                });
+
     }
 }

@@ -4,14 +4,18 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.app.myapplication.R;
 import com.app.myapplication.models.Channel;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.ViewHolder> {
 
@@ -36,6 +40,12 @@ public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
+        holder.name.setText(channels.get(position).getUser().getName());
+
+        Glide.with(context)
+                .load(channels.get(position).getUser().getImage())
+                .into(holder.profilePic);
+
     }
 
     @Override
@@ -45,8 +55,14 @@ public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
+        CircleImageView profilePic;
+        TextView name;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            profilePic = itemView.findViewById(R.id.profile_pic);
+            name = itemView.findViewById(R.id.name);
         }
     }
 }

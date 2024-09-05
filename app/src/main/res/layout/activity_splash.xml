@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/blue"
+    android:background="?attr/colorPrimary"
     android:paddingHorizontal="30dp"
     tools:context=".SplashActivity">
 
@@ -24,11 +24,10 @@
             android:background="@color/white"
             android:paddingVertical="50dp">
 
-            <TextView
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Splash"
-                android:textSize="40sp"/>
+                android:src="@drawable/iqra_uni"/>
 
         </LinearLayout>
 
