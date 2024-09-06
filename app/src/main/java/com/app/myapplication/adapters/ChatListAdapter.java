@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.app.myapplication.R;
 import com.app.myapplication.models.Channel;
+import com.app.myapplication.models.Chat;
 import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 
@@ -20,24 +21,14 @@ import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.ViewHolder> {
+public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHolder> {
 
     private Context context;
-    private ArrayList<Channel> channels;
-    private OnChannelClickListener onChannelClickListener;
+    private ArrayList<Chat> chats;
 
-
-    public interface OnChannelClickListener{
-        void channelClickListener(int position);
-    }
-
-    public void setOnChannelClickListener(OnChannelClickListener onChannelClickListener){
-        this.onChannelClickListener = onChannelClickListener;
-    }
-
-    public ChannelListAdapter(Context context, ArrayList<Channel> channels) {
+    public ChatListAdapter(Context context, ArrayList<Chat> chats) {
         this.context = context;
-        this.channels = channels;
+        this.chats = chats;
     }
 
     @NonNull
@@ -45,7 +36,7 @@ public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.channel_list, parent, false);
+        View view = inflater.inflate(R.layout.chat_item, parent, false);
 
         return new ViewHolder(view);
     }
@@ -53,20 +44,16 @@ public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        holder.name.setText(channels.get(position).getUser().getName());
+        holder.name.setText(chats.get(position).getMessage());
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM 'at' hh:mm a", Locale.getDefault());
-        holder.date.setText(simpleDateFormat.format(channels.get(position).getCreatedAt()));
-
-        Glide.with(context)
-                .load(channels.get(position).getUser().getImage())
-                .into(holder.profilePic);
+        holder.date.setText(simpleDateFormat.format(chats.get(position).getCreatedAt()));
 
     }
 
     @Override
     public int getItemCount() {
-        return channels.size();
+        return chats.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -82,8 +69,6 @@ public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.
             name = itemView.findViewById(R.id.name);
             date = itemView.findViewById(R.id.date);
             root = itemView.findViewById(R.id.root);
-
-            root.setOnClickListener(v -> onChannelClickListener.channelClickListener(getAdapterPosition()));
         }
     }
 }

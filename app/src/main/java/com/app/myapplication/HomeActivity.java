@@ -111,6 +111,7 @@ public class HomeActivity extends AppCompatActivity {
 
                                     channels.add(channel);
                                     adapter.notifyItemChanged(channels.size() - 1);
+                                    channels.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
 
                                 })
                                 .addOnFailureListener(e -> {
@@ -121,6 +122,12 @@ public class HomeActivity extends AppCompatActivity {
 
                     adapter = new ChannelListAdapter(this, channels);
                     channelListView.setAdapter(adapter);
+                    adapter.setOnChannelClickListener(position -> {
+
+                        Intent intent = new Intent(HomeActivity.this, ChatsActivity.class);
+                        intent.putExtra("channel", channels.get(position));
+                        startActivity(intent);
+                    });
 
                 })
                 .addOnFailureListener(e -> {
