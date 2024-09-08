@@ -2,6 +2,7 @@ package com.app.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
+    TextView regBtn;
     TextInputEditText email;
     TextInputEditText password;
     MaterialButton button;
@@ -35,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        regBtn = this.findViewById(R.id.reg_btn);
         email = this.findViewById(R.id.email);
         password = this.findViewById(R.id.password);
         button = this.findViewById(R.id.button);
@@ -47,6 +50,14 @@ public class LoginActivity extends AppCompatActivity {
 
             signinUser();
 
+        });
+
+        regBtn.setOnClickListener(v -> {
+
+            Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+            startActivity(intent);
+
+//            Toast.makeText(this, "Button is clicked", Toast.LENGTH_SHORT).show();
         });
 
     }
