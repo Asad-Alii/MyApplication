@@ -1,12 +1,17 @@
 package com.app.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.QuickContactBadge;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -74,14 +79,16 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         logoutBtn.setOnClickListener(view -> {
-            if(pref.clearPrefs()){
-                Intent intent = new Intent(this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-            else {
-                Toast.makeText(this, "Unable to logout. Please try again!", Toast.LENGTH_SHORT).show();
-            }
+
+            showCustomDialog();
+//            if(pref.clearPrefs()){
+//                Intent intent = new Intent(this, LoginActivity.class);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                startActivity(intent);
+//            }
+//            else {
+//                Toast.makeText(this, "Unable to logout. Please try again!", Toast.LENGTH_SHORT).show();
+//            }
         });
     }
 
@@ -134,5 +141,40 @@ public class HomeActivity extends AppCompatActivity {
                     Toast.makeText(this, e.getMessage().toString(), Toast.LENGTH_SHORT).show();
                 });
 
+    }
+
+    private void showCustomDialog() {
+        // Inflate the custom dialog layout
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View dialogView = inflater.inflate(R.layout.logout_dialog, null);
+
+        // Create and configure the AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(true);
+
+        AlertDialog dialog = builder.create();
+
+        // Get references to the dialog buttons
+        MaterialButton cancelButton = dialogView.findViewById(R.id.cancel);
+        MaterialButton okButton = dialogView.findViewById(R.id.logout);
+
+        // Set button click listeners
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        okButton.setOnClickListener(v -> {
+            // Handle OK button click
+            dialog.dismiss();
+            if(pref.clearPrefs()){
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+            else {
+                Toast.makeText(this, "Unable to logout. Please try again!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Show the dialog
+        dialog.show();
     }
 }
