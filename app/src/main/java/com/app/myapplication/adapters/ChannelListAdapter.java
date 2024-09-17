@@ -53,14 +53,14 @@ public class ChannelListAdapter extends RecyclerView.Adapter<ChannelListAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        //holder.name.setText(channels.get(position).getUser().getName());
+        holder.name.setText(channels.get(position).getUser().getName());
 //
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM 'at' hh:mm a", Locale.getDefault());
-//        holder.date.setText(simpleDateFormat.format(channels.get(position).getCreatedAt()));
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM 'at' hh:mm a", Locale.getDefault());
+        holder.date.setText(simpleDateFormat.format(channels.get(position).getCreatedAt()));
 
-//        Glide.with(context)
-//                .load(channels.get(position).getUser().getImage())
-//                .into(holder.profilePic);
+        Glide.with(context)
+                .load(channels.get(position).getUser().getImage())
+                .into(holder.profilePic);
 
     }
 

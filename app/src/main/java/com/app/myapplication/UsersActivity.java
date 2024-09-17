@@ -1,5 +1,6 @@
 package com.app.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.app.myapplication.adapters.UserListAdapter;
+import com.app.myapplication.models.Channel;
 import com.app.myapplication.models.User;
 import com.app.myapplication.utils.Constants;
 import com.app.myapplication.utils.PrefUtils;
@@ -22,6 +24,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UsersActivity extends AppCompatActivity {
@@ -107,23 +110,43 @@ public class UsersActivity extends AppCompatActivity {
                 });
     }
 
+    Channel channel;
+
     private void checkAndCreateChannel(int position) {
-        String currentUserId = pref.getUser().getId();
+        String myId = pref.getUser().getId();
         String otherUserId = users.get(position).getId();
 
         firestore.collection(Constants.channelsCollection)
-                .whereArrayContains("userIds", currentUserId)
-                .whereArrayContains("userIds", otherUserId)
-                .limit(1)
+                .whereArrayContains("userIds", myId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.getDocuments().isEmpty()) {
                         // Channel already exists
-                        loader.setVisibility(View.GONE);
-                        Toast.makeText(this, "Channel already exists!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Channel does not exist, proceed to create a new one
-                        createNewChannel(position);
+
+                        boolean channelExist = false;
+
+                        for(DocumentSnapshot document : queryDocumentSnapshots.getDocuments()){
+                            List<String> usersIds = (List<String>) document.get("userIds");
+
+                            if(usersIds.contains(otherUserId)){
+                                channelExist = true;
+                                break;
+                            }
+
+                        }
+
+                        if(channelExist){
+                            loader.setVisibility(View.GONE);
+                            Toast.makeText(this, "Channel already exists!", Toast.LENGTH_SHORT).show();
+//                            Intent intent = new Intent(UsersActivity.this, ChatsActivity.class);
+//                            intent.putExtra("channel", channel);
+//                            startActivity(intent);
+                        }
+                        else{
+                            // Channel does not exist, proceed to create a new one
+                            createNewChannel(position);
+                        }
+
                     }
                 })
                 .addOnFailureListener(e -> {
